@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# !/bin/bash
+#!/usr/bin/sh
 
 function scan_dir(){
   for tmp_name in `ls ${1}`; do

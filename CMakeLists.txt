@@ -7,4 +7,4 @@ ADD_SUBDIRECTORY( src/net )
 ADD_SUBDIRECTORY( src/base )
 
 add_executable(Server main.cpp)
-TARGET_LINK_LIBRARIES(Server net base)
+TARGET_LINK_LIBRARIES(Server net base glog)
