@@ -24,6 +24,7 @@ class EPoll : noncopyable {
     void poll();
 
     void updateChannel(Channel* channel);
+    void removeChannel(Channel* channel);
 
     void update(int operation, Channel* channel);
  private:

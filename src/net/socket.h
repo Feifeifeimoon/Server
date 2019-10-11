@@ -4,6 +4,7 @@
 #define _SERVER_SRC_NET_SOCKET_H_
 
 #include <cstdint>
+#include <cstddef>
 #include "../base/noncopyable.h"
 
 namespace net {
@@ -21,6 +22,10 @@ class Socket : noncopyable{
     void listen();
 
     int accept();
+
+    size_t recv(char* buffer, size_t count);
+
+    size_t send(const char* buffer, size_t len);
 
     void setReuseAddr(bool on);
  private:

@@ -7,9 +7,23 @@
 
 namespace net {
 
+class EPoll;
+class Channel;
+
 class EventLoop : noncopyable {
  public:
     EventLoop();
+    ~EventLoop();
+
+    void loop();
+    void quit();
+
+    void updateChannel(Channel* channel);
+    void removeChannel(Channel* channel);
+
+ private:
+    bool quit_;
+    EPoll* poller_;
 };
 
 }  // namespace net

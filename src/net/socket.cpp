@@ -10,8 +10,6 @@
 
 using net::Socket;
 
-static const int MAX_CONN = 20;
-
 
 void Socket::bind(const char *ip, const uint16_t port) {
     struct sockaddr_in socket_addr = {};
@@ -28,7 +26,7 @@ void Socket::bind(const char *ip, const uint16_t port) {
 
 
 void Socket::listen() {
-    int ret = ::listen(socket_fd_, MAX_CONN);
+    int ret = ::listen(socket_fd_, SOMAXCONN);
     if (ret < 0) {
         LOG(FATAL) << "listen failed: " << strerror(errno);
     }
@@ -36,10 +34,11 @@ void Socket::listen() {
 
 int Socket::accept() {
     struct sockaddr_in cli_addr = {};
-    socklen_t addr_len;
+    socklen_t addr_len = 0;
     bzero(&cli_addr, sizeof(cli_addr));
-    int conn_fd = ::accept(socket_fd_, reinterpret_cast<sockaddr*>(&cli_addr),
-                           &addr_len);
+    // accept4直接返回非阻塞的socket
+    int conn_fd = ::accept4(socket_fd_, reinterpret_cast<sockaddr*>(&cli_addr),
+                           &addr_len, SOCK_NONBLOCK);
     if (conn_fd < 0) {
         LOG(ERROR) << "accept failed" << strerror(errno);
         return -1;
@@ -49,6 +48,16 @@ int Socket::accept() {
     return conn_fd;
 }
 
+size_t Socket::recv(char *buffer, size_t count) {
+    return ::recv(socket_fd_, buffer, count, 0);
+}
+
+
+size_t Socket::send(const char *buffer, size_t len) {
+    return ::send(socket_fd_, buffer, len, 0);
+}
+
+
 void Socket::setReuseAddr(bool on) {
     int option_value = on?  1 : 0;
     ::setsockopt(socket_fd_, SOL_SOCKET, SO_REUSEADDR, &option_value,
@@ -56,5 +65,6 @@ void Socket::setReuseAddr(bool on) {
 }
 
 Socket::~Socket() {
+    LOG(INFO) << "~Socket";
     ::close(socket_fd_);
 }

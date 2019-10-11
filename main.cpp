@@ -1,27 +1,32 @@
 
-#include <sys/socket.h>
-
+#include <csignal>
+#include <thread>
+#include <sys/syscall.h>
+#define gettid() syscall(__NR_gettid)
 #include <glog/logging.h>
-#include "src/net/socket.h"
+#include "src/net/tcpserver.h"
 
-int main() {
-//    google::InitGoogleLogging("");
-//    google::SetLogDestination(google::GLOG_INFO, "/tmp/log/log_info_");
-//    google::SetLogDestination(google::GLOG_ERROR, "/tmp/log/log_error_");
-//    google::SetLogDestination(google::GLOG_FATAL, "/tmp/log/log_fatal_");
-    LOG(INFO) << "-- start --";
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
+net::TcpServer* tcpServer = nullptr;
 
-    net::Socket test(fd);
-    test.setReuseAddr(true);
-    test.bind("127.0.0.1", 9000);
-    test.listen();
-    char buffer[1024] = {};
-    for (;;){
-        int cli_fd = test.accept();
-        read(cli_fd, buffer, sizeof(buffer));
-        LOG(INFO) << buffer;
-    }
+void signalDeal(int sig) {
+    LOG(INFO) << "收到退出信号" << sig;
+    delete tcpServer;
+    google::ShutdownGoogleLogging();
+    exit(0);
+}
+
+int main(int argc, char* argv[]) {
+//    google::InitGoogleLogging(argv[0]);
+//    google::SetLogDestination(google::GLOG_INFO, "/server/log/log_info_");
+//    google::SetLogDestination(google::GLOG_ERROR, "/server/log/log_error_");
+//    google::SetLogDestination(google::GLOG_FATAL, "/server/log/log_fatal_");
+//    //缓存的最大时长，超时会写入文件
+//    FLAGS_logbufsecs = 1;
+    //signal(SIGPIPE, SIG_IGN);
+    signal(SIGINT, signalDeal);
+    LOG(INFO) << "------ start -------" << gettid();
+    tcpServer = new net::TcpServer("127.0.0.1",9000);
+    tcpServer->run();
     return 0;
 }
 

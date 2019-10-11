@@ -1,2 +1,2 @@
 AUX_SOURCE_DIRECTORY(. DIR_BASE_SRCS)
-ADD_LIBRARY ( base ${DIR_BASE_SRCS})
+ADD_LIBRARY ( base ${DIR_BASE_SRCS} logging.cpp logging.h)
